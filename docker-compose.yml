@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: skyroot_db
+    environment:
+      POSTGRES_USER: skyroot
+      POSTGRES_PASSWORD: skyroot_secret
+      POSTGRES_DB: sky_root_crm
+    ports:
+      - "5433:5432"            # host 5433 -> avoids clashing with a local Postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skyroot -d sky_root_crm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  server:
+    build: ./server
+    container_name: skyroot_api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "4000"
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: skyroot
+      PGPASSWORD: skyroot_secret
+      PGDATABASE: sky_root_crm
+      JWT_SECRET: change-me-to-a-long-random-string-in-prod
+      JWT_EXPIRES: 7d
+      CLIENT_ORIGIN: http://localhost:8080
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
+    expose:
+      - "4000"
+    ports:
+      - "4000:4000"            # exposed for direct API access / debugging
+    restart: unless-stopped
+
+  client:
+    build: ./client
+    container_name: skyroot_web
+    depends_on:
+      - server
+    ports:
+      - "8080:80"              # open the app at http://localhost:8080
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  uploads:
