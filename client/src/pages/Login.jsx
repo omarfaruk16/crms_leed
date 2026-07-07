@@ -17,7 +17,7 @@ const FEATURES = [
 ];
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, guestLogin } = useAuth();
   const nav = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,6 +35,11 @@ export default function Login() {
     } finally {
       setBusy(false);
     }
+  };
+
+  const handleGuestLogin = async () => {
+    await guestLogin();
+    nav('/');
   };
 
   const fill = (em, pw) => { setEmail(em); setPassword(pw); };
@@ -117,6 +122,13 @@ export default function Login() {
               {busy ? <Spinner className="w-5 h-5 border-white/40 border-t-white" /> : 'Sign in'}
             </button>
           </form>
+
+          <div className="mt-4">
+            <button onClick={handleGuestLogin} type="button"
+              className="w-full py-3 rounded-xl border-2 border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-200 font-semibold hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+              Continue as Guest
+            </button>
+          </div>
 
           <div className="mt-8 pt-6 border-t border-neutral-300 dark:border-neutral-700">
             <div className="text-xs font-semibold uppercase tracking-wide text-neutral-600 dark:text-neutral-400 mb-3">Demo credentials</div>

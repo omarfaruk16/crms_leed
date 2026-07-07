@@ -16,6 +16,20 @@ export async function authRequired(req, res, next) {
     const token = bearer || req.cookies?.token;
     if (!token) return res.status(401).json({ error: 'Not authenticated' });
 
+    // Handle guest token
+    if (token === 'guest-token') {
+      req.user = {
+        id: 'guest',
+        email: 'guest@skyroot.com',
+        account_type: 'guest',
+        isGuest: true,
+        permissions: {},
+        isAdmin: false,
+        can: () => false,
+      };
+      return next();
+    }
+
     const { sub } = jwt.verify(token, SECRET);
     const { rows } = await query(
       `SELECT a.id, a.name, a.email, a.account_type, a.company, a.avatar_url,

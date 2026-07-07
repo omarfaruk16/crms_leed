@@ -29,6 +29,19 @@ export function AuthProvider({ children }) {
     return user;
   };
 
+  const guestLogin = async () => {
+    const guestUser = {
+      id: 'guest',
+      email: 'guest@skyroot.com',
+      account_type: 'guest',
+      isGuest: true,
+      permissions: {},
+    };
+    setToken('guest-token');
+    setUser(guestUser);
+    return guestUser;
+  };
+
   const logout = async () => {
     try { await api.post('/auth/logout'); } catch { /* ignore */ }
     setToken(null);
@@ -41,7 +54,7 @@ export function AuthProvider({ children }) {
   const isType = (...t) => t.includes(user?.account_type);
 
   return (
-    <AuthCtx.Provider value={{ user, loading, login, logout, can, isAdmin, isType, accountType: user?.account_type, reload: load }}>
+    <AuthCtx.Provider value={{ user, loading, login, logout, guestLogin, can, isAdmin, isType, accountType: user?.account_type, reload: load }}>
       {children}
     </AuthCtx.Provider>
   );
